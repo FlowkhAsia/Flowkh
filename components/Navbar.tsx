@@ -1,0 +1,189 @@
+'use client';
+
+import { useState, useEffect, useRef, Suspense } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, Bell, User, X } from 'lucide-react';
+import { searchMovies, Movie } from '@/lib/tmdb';
+
+function NavbarContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(!!initialQuery);
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [suggestions, setSuggestions] = useState<Movie[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const timeoutId = setTimeout(async () => {
+        const results = await searchMovies(searchQuery.trim());
+        setSuggestions(results.slice(0, 5));
+        if (document.activeElement === searchInputRef.current) {
+          setShowSuggestions(true);
+        }
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      setSearchQuery(q);
+      setIsSearchOpen(true);
+    } else {
+      setSearchQuery('');
+      setIsSearchOpen(false);
+    }
+  }, [searchParams]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (searchQuery.trim().length > 0) {
+        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setShowSuggestions(false);
+      } else {
+        router.push('/');
+      }
+    }
+  };
+
+  const toggleSearch = () => {
+    if (isSearchOpen) {
+      if (!searchQuery) {
+        setIsSearchOpen(false);
+      } else {
+        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setShowSuggestions(false);
+      }
+    } else {
+      setIsSearchOpen(true);
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setIsSearchOpen(false);
+    setShowSuggestions(false);
+    router.push('/');
+  };
+
+  return (
+    <header
+      className={`fixed top-0 z-50 flex w-full items-center justify-between px-4 py-4 transition-all duration-300 md:px-10 ${
+        isScrolled ? 'bg-[#141414]' : 'bg-transparent bg-gradient-to-b from-black/80 to-transparent'
+      }`}
+    >
+      <div className="flex items-center space-x-2 md:space-x-10">
+        <Link href="/">
+          <h1 className="text-2xl font-bold text-netflix-red md:text-4xl cursor-pointer tracking-wider">FLOWKH</h1>
+        </Link>
+
+        <ul className="hidden space-x-4 md:flex">
+          <li className="cursor-pointer text-sm font-semibold text-white hover:text-gray-300">Home</li>
+          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">TV Shows</li>
+          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">Movies</li>
+          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">New & Popular</li>
+          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">My List</li>
+        </ul>
+      </div>
+
+      <div className="flex items-center space-x-4 text-sm font-light">
+        <div className="relative" ref={searchContainerRef}>
+          <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'bg-black/80 border border-white/80 px-2 py-1' : ''}`}>
+            <Search className="h-6 w-6 cursor-pointer" onClick={toggleSearch} />
+            {isSearchOpen && (
+              <>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+                  placeholder="Titles, people, genres"
+                  className="bg-transparent outline-none text-white ml-2 w-40 md:w-56 transition-all duration-300"
+                />
+                <X className="h-4 w-4 cursor-pointer text-gray-400 hover:text-white" onClick={clearSearch} />
+              </>
+            )}
+          </div>
+          
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 mt-1 w-full bg-[#141414] border border-white/20 rounded shadow-lg overflow-hidden">
+              {suggestions.map((movie) => {
+                const title = movie.title || movie.name || movie.original_name;
+                return (
+                  <div
+                    key={movie.id}
+                    className="px-4 py-3 hover:bg-white/10 cursor-pointer text-sm text-white truncate border-b border-white/10 last:border-0"
+                    onClick={() => {
+                      if (title) {
+                        setSearchQuery(title);
+                        setShowSuggestions(false);
+                        router.push(`/search?q=${encodeURIComponent(title)}`);
+                      }
+                    }}
+                  >
+                    {title}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <p className="hidden lg:inline cursor-pointer">Kids</p>
+        <Bell className="h-6 w-6 cursor-pointer" />
+        <div className="cursor-pointer rounded bg-gray-800 p-1">
+          <User className="h-5 w-5 text-gray-300" />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={<header className="fixed top-0 z-50 flex w-full h-16 bg-transparent" />}>
+      <NavbarContent />
+    </Suspense>
+  );
+}

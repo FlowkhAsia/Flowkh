@@ -1,0 +1,5 @@
+{
+  "name": "Flowkh",
+  "description": "Flowkh - A movie streaming clone using TMDB API",
+  "requestFramePermissions": []
+}
