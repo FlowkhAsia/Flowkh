@@ -1,31 +1,38 @@
-import { searchMovies, IMAGE_BASE_URL } from '@/lib/tmdb';
+'use client';
+
+import { useMyList } from '@/context/MyListContext';
+import { IMAGE_BASE_URL, Movie } from '@/lib/tmdb';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const params = await searchParams;
-  const query = params.q;
+export default function MyListPage() {
+  const { myList } = useMyList();
+  const [isMounted, setIsMounted] = useState(false);
 
-  if (!query) {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
     return (
       <main className="pt-32 px-4 md:px-10 min-h-screen bg-netflix-black text-white">
-        <h1 className="text-2xl font-semibold mb-8">Please enter a search term.</h1>
+        <h1 className="text-2xl font-semibold mb-8">My List</h1>
       </main>
     );
   }
 
-  const results = await searchMovies(query);
-
   return (
     <main className="pt-32 px-4 md:px-10 min-h-screen bg-netflix-black text-white">
-      <h1 className="text-2xl font-semibold mb-8">Search Results for &quot;{query}&quot;</h1>
+      <h1 className="text-2xl font-semibold mb-8">My List</h1>
       
-      {results.length === 0 ? (
-        <p className="text-gray-400">No results found for your query.</p>
+      {myList.length === 0 ? (
+        <p className="text-gray-400">You haven&apos;t added any movies to your list yet.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-24">
-          {results.map((movie) => {
+          {myList.map((movie) => {
             const imagePath = movie.backdrop_path || movie.poster_path;
             const imageUrl = imagePath 
               ? `${IMAGE_BASE_URL}${imagePath}`

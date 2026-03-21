@@ -1,8 +1,9 @@
 'use client';
 
 import { Movie, IMAGE_BASE_URL } from '@/lib/tmdb';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 
@@ -53,26 +54,32 @@ export default function Row({ title, movies }: RowProps) {
               : `https://picsum.photos/seed/${movie.id}/400/600?blur=2`;
 
             return (
-              <motion.div
-                key={movie.id}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-                className="relative cursor-pointer transition duration-200 ease-out md:hover:z-50 h-64 min-w-[160px] md:h-80 md:min-w-[200px]"
-              >
-                <Image
-                  src={imageUrl}
-                  alt={movie.title || movie.name || 'Movie poster'}
-                  fill
-                  className="rounded-sm object-cover md:rounded"
-                  referrerPolicy="no-referrer"
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end p-2">
-                   <p className="text-white text-xs md:text-sm font-semibold truncate w-full text-shadow-md">
-                     {movie.title || movie.name || movie.original_name}
-                   </p>
-                </div>
-              </motion.div>
+              <Link key={movie.id} href={`/movie/${movie.id}`}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative cursor-pointer transition duration-200 ease-out md:hover:z-50 h-64 min-w-[160px] md:h-80 md:min-w-[200px]"
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={movie.title || movie.name || 'Movie poster'}
+                    fill
+                    className="rounded-sm object-cover md:rounded"
+                    referrerPolicy="no-referrer"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                     <p className="text-white text-xs md:text-sm font-semibold truncate w-full text-shadow-md mb-1">
+                       {movie.title || movie.name || movie.original_name}
+                     </p>
+                     <div className="flex items-center gap-1 text-yellow-400">
+                       <Star className="h-3 w-3 fill-current" />
+                       <span className="text-[10px] font-bold text-white">{movie.vote_average?.toFixed(1)}</span>
+                       <span className="text-[10px] text-gray-300">({movie.vote_count})</span>
+                     </div>
+                  </div>
+                </motion.div>
+              </Link>
             );
           })}
         </div>

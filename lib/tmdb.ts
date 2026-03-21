@@ -189,6 +189,36 @@ export const getLogo = async (id: number, type: string = 'movie'): Promise<strin
   }
 };
 
+export const getMovieDetails = async (id: number, type: string = 'movie'): Promise<Movie | null> => {
+  if (!API_KEY || API_KEY === 'YOUR_TMDB_API_KEY') {
+    return {
+      id,
+      title: `Mock Movie ${id}`,
+      overview: 'This is a mock overview for a movie or TV show. It provides a brief description of the plot and characters. Enjoy watching this placeholder content!',
+      poster_path: '',
+      backdrop_path: '',
+      genre_ids: [28, 12, 16],
+      popularity: 100,
+      release_date: '2023-01-01',
+      vote_average: 8.5,
+      vote_count: 1000,
+    };
+  }
+  try {
+    const response = await fetch(`${BASE_URL}/${type}/${id}?api_key=${API_KEY}&language=en-US`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    // TMDB returns genres as an array of objects, map it to genre_ids to match the Movie interface
+    if (data.genres) {
+      data.genre_ids = data.genres.map((g: any) => g.id);
+    }
+    return data;
+  } catch (error) {
+    console.error('Error fetching movie details:', error);
+    return null;
+  }
+};
+
 // Mock Data Fallback
 function getMockData(endpoint: string): Movie[] {
   // Generate some deterministic mock data based on the endpoint

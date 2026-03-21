@@ -126,11 +126,15 @@ function NavbarContent() {
         </Link>
 
         <ul className="hidden space-x-4 md:flex">
-          <li className="cursor-pointer text-sm font-semibold text-white hover:text-gray-300">Home</li>
+          <li className="cursor-pointer text-sm font-semibold text-white hover:text-gray-300">
+            <Link href="/">Home</Link>
+          </li>
           <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">TV Shows</li>
           <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">Movies</li>
           <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">New & Popular</li>
-          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">My List</li>
+          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">
+            <Link href="/my-list">My List</Link>
+          </li>
         </ul>
       </div>
 
