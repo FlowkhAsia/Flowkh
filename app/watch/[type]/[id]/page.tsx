@@ -1,7 +1,8 @@
 import { ArrowLeft, Play } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getTvSeason, getMovieDetails, IMAGE_BASE_URL } from '@/lib/tmdb';
+import { getTvSeason, getMovieDetails, getSimilar, IMAGE_BASE_URL } from '@/lib/tmdb';
+import SeasonSelector from '@/components/SeasonSelector';
 
 export default async function WatchPage({ 
   params, 
@@ -16,11 +17,18 @@ export default async function WatchPage({
   let embedUrl = '';
   let episodes: any[] = [];
   let showDetails: any = null;
+  let similarMovies: any[] = [];
   const currentSeason = season || '1';
   const currentEpisode = episode || '1';
 
   if (type === 'movie') {
     embedUrl = `https://vidsrc.cc/v2/embed/movie/${id}`;
+    try {
+      const movieId = parseInt(id, 10);
+      similarMovies = await getSimilar(movieId, 'movie');
+    } catch (e) {
+      console.error("Failed to fetch similar movies", e);
+    }
   } else if (type === 'tv') {
     embedUrl = `https://vidsrc.cc/v2/embed/tv/${id}/${currentSeason}/${currentEpisode}`;
     try {
@@ -71,7 +79,11 @@ export default async function WatchPage({
             <h2 className="text-lg font-semibold text-white truncate">
               {showDetails?.name || 'Episodes'}
             </h2>
-            <p className="text-sm text-gray-400">Season {currentSeason}</p>
+            {showDetails?.seasons ? (
+              <SeasonSelector seasons={showDetails.seasons} currentSeason={currentSeason} />
+            ) : (
+              <p className="text-sm text-gray-400">Season {currentSeason}</p>
+            )}
           </div>
           
           <div className="flex flex-col p-2 gap-2">
@@ -126,7 +138,7 @@ export default async function WatchPage({
                   <Link 
                     key={ep.id} 
                     href={`/watch/tv/${id}?season=${currentSeason}&episode=${ep.episode_number}`}
-                    className="group p-2 rounded hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-white/50"
+                    className="group p-2 rounded hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-white/50 border-l-4 border-transparent"
                     aria-label={`Play Episode ${ep.episode_number}: ${ep.name}`}
                   >
                     {innerContent}
@@ -137,11 +149,66 @@ export default async function WatchPage({
               return (
                 <div 
                   key={ep.id} 
-                  className={`p-2 rounded ${isCurrent ? 'bg-white/10' : 'opacity-50'}`}
+                  className={`p-2 rounded ${isCurrent ? 'bg-[#2a2a2a] border-l-4 border-netflix-red' : 'opacity-50 border-l-4 border-transparent'}`}
                   aria-label={isCurrent ? `Currently playing Episode ${ep.episode_number}: ${ep.name}` : `Episode ${ep.episode_number}: ${ep.name}, Coming ${airDate?.toLocaleDateString()}`}
                 >
                   {innerContent}
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Similar Movies Sidebar (Only for Movies) */}
+      {type === 'movie' && similarMovies && similarMovies.length > 0 && (
+        <div className="w-full md:w-80 lg:w-96 bg-[#141414] h-[60vh] md:h-full overflow-y-auto border-t md:border-t-0 md:border-l border-white/10 flex flex-col shrink-0">
+          <div className="p-4 sticky top-0 bg-[#141414]/95 backdrop-blur z-10 border-b border-white/10">
+            <h2 className="text-lg font-semibold text-white truncate">
+              More Like This
+            </h2>
+          </div>
+          
+          <div className="flex flex-col p-2 gap-2">
+            {similarMovies.map((similarMovie) => {
+              const imageSrc = similarMovie.backdrop_path 
+                ? `${IMAGE_BASE_URL}${similarMovie.backdrop_path}` 
+                : (similarMovie.poster_path ? `${IMAGE_BASE_URL}${similarMovie.poster_path}` : `https://picsum.photos/seed/${similarMovie.id}/300/170?blur=2`);
+
+              const innerContent = (
+                <div className="flex gap-3 items-center">
+                  <div className="relative w-24 h-16 shrink-0 rounded overflow-hidden bg-[#2a2a2a]">
+                    <Image
+                      src={imageSrc}
+                      alt={similarMovie.title || similarMovie.name || 'Movie'}
+                      fill
+                      className="object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                      <Play className="w-6 h-6 text-white fill-white" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-medium truncate text-gray-300 group-hover:text-white">
+                      {similarMovie.title || similarMovie.name || similarMovie.original_name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {similarMovie.release_date ? similarMovie.release_date.substring(0, 4) : ''}
+                    </span>
+                  </div>
+                </div>
+              );
+
+              return (
+                <Link 
+                  key={similarMovie.id} 
+                  href={`/watch/movie/${similarMovie.id}`}
+                  className="group p-2 rounded hover:bg-white/10 transition focus:outline-none focus:ring-2 focus:ring-white/50"
+                  aria-label={`Play ${similarMovie.title || similarMovie.name || similarMovie.original_name}`}
+                >
+                  {innerContent}
+                </Link>
               );
             })}
           </div>
