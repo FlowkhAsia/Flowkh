@@ -6,7 +6,6 @@ import { Play, Plus, ThumbsUp, Check, ArrowLeft } from 'lucide-react';
 import AddToListButton from '@/components/AddToListButton';
 import TrailerButton from '@/components/TrailerButton';
 import Row from '@/components/Row';
-import BackButton from '@/components/BackButton';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, type: string }> }): Promise<Metadata> {
   const { id, type } = await params;
@@ -87,10 +86,6 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
   return (
     <main className="min-h-screen bg-[#141414] text-white pb-20">
       <div className="relative h-[60vh] md:h-[80vh] w-full">
-        <div className="absolute top-24 left-4 md:left-10 z-50">
-          <BackButton />
-        </div>
-        
         <Image
           src={movie.backdrop_path ? `${IMAGE_BASE_URL}${movie.backdrop_path}` : `https://picsum.photos/seed/${movie.id}/1920/1080?blur=2`}
           alt={movie.title || movie.name || 'Movie backdrop'}

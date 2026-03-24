@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ArrowLeft, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTvSeason, getMovieDetails, getSimilar, IMAGE_BASE_URL } from '@/lib/tmdb';
@@ -113,16 +113,6 @@ export default async function WatchPage({
     <div className="w-screen h-screen bg-black flex flex-col md:flex-row overflow-hidden">
       {/* Main Player Area */}
       <div className="flex-grow flex flex-col relative h-[40vh] md:h-full shrink-0 md:shrink">
-        <div className="absolute top-4 left-4 z-50">
-          <Link 
-            href={`/title/${type}/${id}`} 
-            className="flex items-center gap-2 text-white hover:text-gray-300 transition bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
-            aria-label="Go back to details"
-          >
-            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-            <span className="font-semibold">Back</span>
-          </Link>
-        </div>
         <iframe 
           src={embedUrl} 
           title={`Video player for ${type === 'movie' ? 'movie' : 'TV show'}`}
