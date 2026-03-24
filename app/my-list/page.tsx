@@ -32,10 +32,10 @@ export default function MyListPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-24">
           {myList.map((movie) => {
-            const imagePath = movie.backdrop_path || movie.poster_path;
+            const imagePath = movie.poster_path || movie.backdrop_path;
             const imageUrl = imagePath 
               ? `${IMAGE_BASE_URL}${imagePath}`
-              : `https://picsum.photos/seed/${movie.id}/500/281?blur=2`;
+              : `https://picsum.photos/seed/${movie.id}/400/600?blur=2`;
 
             return (
               <Link 
@@ -45,7 +45,7 @@ export default function MyListPage() {
                 className="focus:outline-none focus:ring-2 focus:ring-white/50 rounded block"
               >
                 <div className="relative group cursor-pointer transition duration-200 ease-out hover:scale-105">
-                  <div className="aspect-video relative rounded overflow-hidden">
+                  <div className="aspect-[2/3] relative rounded overflow-hidden">
                     <Image
                       src={imageUrl}
                       alt={movie.title || movie.name || 'Movie poster'}

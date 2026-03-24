@@ -83,6 +83,19 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
   // Use movie ID to generate a deterministic pseudo-random match percentage
   const matchPercentage = 80 + (movie.id % 20);
 
+  let durationString = '';
+  if (type === 'tv') {
+    const seasons = movie.number_of_seasons || (movie.seasons ? movie.seasons.length : 1);
+    const episodes = movie.number_of_episodes ? ` (${movie.number_of_episodes} Episodes)` : '';
+    durationString = `${seasons} Season${seasons !== 1 ? 's' : ''}${episodes}`;
+  } else {
+    if (movie.runtime) {
+      const hours = Math.floor(movie.runtime / 60);
+      const minutes = movie.runtime % 60;
+      durationString = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#141414] text-white pb-20">
       <div className="relative h-[60vh] md:h-[80vh] w-full">
@@ -144,10 +157,7 @@ export default async function MovieDetailPage({ params }: { params: Promise<{ id
               <span className="flex h-5 items-center justify-center rounded border border-white/40 px-2 text-xs">
                 TV-MA
               </span>
-              <span className="font-light">2h 15m</span>
-              <span className="flex h-5 items-center justify-center rounded border border-white/40 px-2 text-xs">
-                HD
-              </span>
+              {durationString && <span className="font-light">{durationString}</span>}
             </div>
             
             <p className="text-base md:text-lg leading-relaxed text-white/90 mb-8">

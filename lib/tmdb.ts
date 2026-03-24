@@ -38,6 +38,9 @@ export interface Movie {
   vote_average: number;
   vote_count: number;
   seasons?: Season[];
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  runtime?: number;
 }
 
 export interface Genre {
@@ -119,6 +122,8 @@ export const getKDrama = () => fetchTMDB(`/discover/tv?with_original_language=ko
 export const getCDrama = () => fetchTMDB(`/discover/tv?with_original_language=zh${getAiringDateRange()}`);
 export const getAnime = () => fetchTMDB(`/discover/tv?with_genres=16&with_original_language=ja${getAiringDateRange()}`);
 export const getPopularMovies = () => fetchTMDB(requests.fetchPopularMovies);
+export const getMoviesByGenre = (genreId: string) => fetchTMDB(`/discover/movie?with_genres=${genreId}&sort_by=popularity.desc`);
+export const getTvShowsByGenre = (genreId: string) => fetchTMDB(`/discover/tv?with_genres=${genreId}&sort_by=popularity.desc`);
 export const searchMovies = (query: string) => fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}&include_adult=false`);
 
 export const getGenres = async (): Promise<Genre[]> => {
@@ -289,6 +294,9 @@ export const getMovieDetails = async (id: number, type: string = 'movie'): Promi
       release_date: '2023-01-01',
       vote_average: 8.5,
       vote_count: 1000,
+      runtime: type === 'movie' ? 135 : undefined,
+      number_of_seasons: type === 'tv' ? 3 : undefined,
+      number_of_episodes: type === 'tv' ? 24 : undefined,
     };
   }
   try {
