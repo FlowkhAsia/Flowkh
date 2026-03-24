@@ -126,13 +126,19 @@ function NavbarContent() {
         </Link>
 
         <ul className="hidden space-x-4 md:flex">
-          <li className="cursor-pointer text-sm font-semibold text-white hover:text-gray-300">
+          <li className="text-sm font-semibold text-white hover:text-gray-300">
             <Link href="/">Home</Link>
           </li>
-          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">TV Shows</li>
-          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">Movies</li>
-          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">New & Popular</li>
-          <li className="cursor-pointer text-sm font-semibold text-gray-300 hover:text-white transition">
+          <li className="text-sm font-semibold text-gray-300 hover:text-white transition">
+            <Link href="/category/tv">TV Shows</Link>
+          </li>
+          <li className="text-sm font-semibold text-gray-300 hover:text-white transition">
+            <Link href="/category/movie">Movies</Link>
+          </li>
+          <li className="text-sm font-semibold text-gray-300 hover:text-white transition">
+            <Link href="/category/popular">New &amp; Popular</Link>
+          </li>
+          <li className="text-sm font-semibold text-gray-300 hover:text-white transition">
             <Link href="/my-list">My List</Link>
           </li>
         </ul>
@@ -176,14 +182,14 @@ function NavbarContent() {
                   : `https://picsum.photos/seed/${movie.id}/100/150?blur=2`;
 
                 return (
-                  <button
+                  <Link
                     key={movie.id}
+                    href={`/title/${movie.media_type || (movie.first_air_date ? 'tv' : 'movie')}/${movie.id}`}
                     className="flex w-full items-center gap-3 px-4 py-3 hover:bg-white/10 cursor-pointer transition-colors border-b border-white/10 last:border-0 text-left focus:outline-none focus:ring-2 focus:ring-white/50"
                     onClick={() => {
                       if (title) {
                         setSearchQuery(title);
                         setShowSuggestions(false);
-                        router.push(`/search?q=${encodeURIComponent(title)}`);
                       }
                     }}
                     aria-label={`Search for ${title}`}
@@ -207,20 +213,16 @@ function NavbarContent() {
                       <span className="text-sm font-medium text-white truncate">{title}</span>
                       {year && <span className="text-xs text-gray-400">{year}</span>}
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
-              <button 
-                className="w-full px-4 py-3 text-center text-sm text-gray-400 hover:text-white hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
-                onClick={() => {
-                  if (searchQuery.trim().length > 0) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-                    setShowSuggestions(false);
-                  }
-                }}
+              <Link 
+                href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                className="block w-full px-4 py-3 text-center text-sm text-gray-400 hover:text-white hover:bg-white/10 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+                onClick={() => setShowSuggestions(false)}
               >
                 See all results for &quot;{searchQuery}&quot;
-              </button>
+              </Link>
             </div>
           )}
         </div>
