@@ -73,8 +73,8 @@ export default function PeachifyPlayer({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Validate origin to ensure it's from Peachify
-      if (event.origin !== 'https://peachify.top') return;
+      // Validate origin to ensure it's from the embed server
+      if (event.origin !== 'https://peachify.top' && event.origin !== 'https://embedmaster.link') return;
       
       const payload = event.data;
       if (!payload) return;
@@ -115,7 +115,7 @@ export default function PeachifyPlayer({
   }
 
   // Build iframe URL
-  const baseUrl = 'https://peachify.top/embed';
+  const baseUrl = 'https://embedmaster.link/i0iyqu3b4qz2zg29';
   const urlPath = type === 'movie' ? `/movie/${tmdbId}` : `/tv/${tmdbId}/${season}/${episode}`;
   
   const searchParams = new URLSearchParams();
